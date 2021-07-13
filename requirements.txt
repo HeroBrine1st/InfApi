@@ -1,0 +1,6 @@
+uvicorn
+fastapi~=0.66.0
+pydantic
+tortoise-orm
+aerich
+aiomysql
