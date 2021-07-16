@@ -24,7 +24,6 @@ class SubthemeReducedModel(BaseModel):
 
     @staticmethod
     async def of(subtheme: Subtheme):
-        await subtheme.fetch_related()
         return SubthemeReducedModel(
             id=subtheme.id,
             name=subtheme.name,
@@ -37,7 +36,6 @@ class ThemeReducedModel(BaseModel):
 
     @staticmethod
     async def of(theme: Theme):
-        await theme.fetch_related()
         return ThemeReducedModel(
             id=theme.id,
             name=theme.name,
@@ -52,7 +50,6 @@ class TaskModel(BaseModel):
 
     @staticmethod
     async def of(task: Task):
-        await task.fetch_related()
         return TaskModel(
             id=task.id,
             variant=await VariantReducedModel.of(await task.variant),
@@ -66,7 +63,6 @@ class VariantModel(VariantReducedModel):
 
     @staticmethod
     async def of(variant: Variant):
-        await variant.fetch_related()
         return VariantModel(
             id=variant.id,
             name=variant.name,
@@ -80,7 +76,6 @@ class SubthemeModel(SubthemeReducedModel):
 
     @staticmethod
     async def of(subtheme: Subtheme):
-        await subtheme.fetch_related()
         return SubthemeModel(
             id=subtheme.id,
             name=subtheme.name,
@@ -93,7 +88,6 @@ class ThemeModel(ThemeReducedModel):
 
     @staticmethod
     async def of(theme: Theme):
-        await theme.fetch_related()
         return ThemeModel(
             id=theme.id,
             name=theme.name,
