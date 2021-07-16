@@ -1,0 +1,31 @@
+-- upgrade --
+CREATE TABLE IF NOT EXISTS `aerich` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `version` VARCHAR(255) NOT NULL,
+    `app` VARCHAR(20) NOT NULL,
+    `content` JSON NOT NULL
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `theme` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` LONGTEXT NOT NULL
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `subtheme` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` LONGTEXT NOT NULL,
+    `cheat` LONGTEXT NOT NULL,
+    `theme_id` INT NOT NULL,
+    CONSTRAINT `fk_subtheme_theme_a73719cf` FOREIGN KEY (`theme_id`) REFERENCES `theme` (`id`) ON DELETE CASCADE
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `variant` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(64) NOT NULL
+) CHARACTER SET utf8mb4;
+CREATE TABLE IF NOT EXISTS `task` (
+    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `number` INT NOT NULL,
+    `content` LONGTEXT NOT NULL,
+    `subtheme_id` INT NOT NULL,
+    `variant_id` INT NOT NULL,
+    CONSTRAINT `fk_task_subtheme_7e1bd569` FOREIGN KEY (`subtheme_id`) REFERENCES `subtheme` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_task_variant_bb403855` FOREIGN KEY (`variant_id`) REFERENCES `variant` (`id`) ON DELETE CASCADE
+) CHARACTER SET utf8mb4;

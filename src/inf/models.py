@@ -2,21 +2,25 @@ from tortoise.fields import *
 from tortoise.models import Model
 
 class Variant(Model):
+    id = IntField(pk=True)
     name = CharField(64)
     tasks: ForeignKeyRelation["Task"]
 
 class Task(Model):
-    variant = ForeignKeyField("models.Variant", "tasks")
+    id = IntField(pk=True)
+    variant = ForeignKeyField("inf.Variant", "tasks")
     number = IntField()
     content = TextField()
-    subtheme = ForeignKeyField("models.Subtheme", "tasks")
+    subtheme: ForeignKeyRelation["Subtheme"] = ForeignKeyField("inf.Subtheme", "tasks")
 
 class Theme(Model):
+    id = IntField(pk=True)
     name = TextField()
     subthemes: ReverseRelation["Subtheme"]
 
 class Subtheme(Model):
+    id = IntField(pk=True)
     name = TextField()
     cheat = TextField()  # image_url
-    theme = ForeignKeyField("models.Theme", "subthemes")
+    theme: ForeignKeyRelation["Theme"] = ForeignKeyField("inf.Theme", "subthemes")
     tasks: ReverseRelation["Task"]
