@@ -4,13 +4,13 @@ from tortoise.models import Model
 class Variant(Model):
     id = IntField(pk=True)
     name = CharField(64)
-    tasks: ForeignKeyRelation["Task"]
+    tasks: ReverseRelation["Task"]
 
 class Task(Model):
     id = IntField(pk=True)
-    variant = ForeignKeyField("inf.Variant", "tasks")
     number = IntField()
     content = TextField()
+    variant: ForeignKeyRelation["Variant"] = ForeignKeyField("inf.Variant", "tasks")
     subtheme: ForeignKeyRelation["Subtheme"] = ForeignKeyField("inf.Subtheme", "tasks")
 
 class Theme(Model):
