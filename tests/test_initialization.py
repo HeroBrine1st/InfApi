@@ -1,7 +1,5 @@
-import asyncio
 import pytest
-import dotenv
-dotenv.load_dotenv()
+import settings
 
 from httpx import AsyncClient
 from tortoise import Tortoise
@@ -12,15 +10,15 @@ from inf.models import *
 @pytest.mark.asyncio
 async def database():
     # Connect
-    import settings
+
     await Tortoise.init(config=settings.TORTOISE_ORM)
     # Clear database
-    async for task in Task.all():
-        await task.delete()
-    async for variant in Variant.all():
-        await variant.delete()
     async for theme in Theme.all():
         await theme.delete()
+    async for variant in Variant.all():
+        await variant.delete()
+    async for task in Task.all():
+        await task.delete()
     async for subtheme in Subtheme.all():
         await subtheme.delete()
     # Create test entries
@@ -52,7 +50,6 @@ async def database():
     await Tortoise.close_connections()
 
 @pytest.fixture(scope="function")
-@pytest.mark.usefixtures("initialize_test_environment")
 @pytest.mark.asyncio
 async def client():
     async with AsyncClient(app=app, base_url="http://test") as client:

@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
 from inf.models import Subtheme, Task, Theme, Variant
 
-#region GET response models
+# region GET response models
 class VariantReducedModel(BaseModel):
     id: int
     name: str
@@ -21,13 +21,15 @@ class SubthemeReducedModel(BaseModel):
     id: int
     name: str
     theme_id: int
+    task_count: int
 
     @staticmethod
     async def of(subtheme: Subtheme):
         return SubthemeReducedModel(
             id=subtheme.id,
             name=subtheme.name,
-            theme_id=(await subtheme.theme).id
+            theme_id=(await subtheme.theme).id,
+            task_count=(await subtheme.tasks.all().count())
         )
 
 class ThemeReducedModel(BaseModel):
@@ -69,9 +71,8 @@ class VariantModel(VariantReducedModel):
             tasks=[await TaskModel.of(task) async for task in variant.tasks.all()]
         )
 
-
 class SubthemeModel(SubthemeReducedModel):
-    cheat: str # image url
+    cheat: str  # image url
     tasks: List[TaskModel]
 
     @staticmethod
@@ -81,7 +82,9 @@ class SubthemeModel(SubthemeReducedModel):
             name=subtheme.name,
             theme_id=(await subtheme.theme).id,
             cheat=subtheme.cheat,
-            tasks=[await TaskModel.of(task) async for task in subtheme.tasks.all()])
+            tasks=[await TaskModel.of(task) async for task in subtheme.tasks.all()],
+            task_count=(await subtheme.tasks.all().count())
+        )
 
 class ThemeModel(ThemeReducedModel):
     subthemes: List[SubthemeModel]
@@ -94,4 +97,35 @@ class ThemeModel(ThemeReducedModel):
             subthemes=[await SubthemeModel.of(subtheme) async for subtheme in theme.subthemes.all()]
         )
 
-#endregion
+# endregion
+# region POST request models
+class TaskPostModel(BaseModel):
+    # variant id included in URL
+    number: int
+    content: str
+    subtheme_id: int
+
+class VariantPostModel(BaseModel):
+    name: str
+
+class SubthemePostModel(BaseModel):
+    name: str
+    # theme id included in URL
+    cheat: Optional[str] = ""  # image url
+
+class ThemePostModel(BaseModel):
+    name: str
+
+# endregion
+# region PUT request models
+class TaskPutModel(TaskPostModel):
+    variant_id: Optional[int] = None # Change variant
+    subtheme_id: Optional[int] = None # Change subtheme
+
+VariantPutModel = VariantPostModel
+
+class SubthemePutModel(SubthemePostModel):
+    theme_id: Optional[int] = None # Change theme
+
+ThemePutModel = ThemePostModel
+# endregion

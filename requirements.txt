@@ -5,7 +5,10 @@ tortoise-orm
 aerich
 aiomysql
 python-dotenv
+python-multipart
+starlette
 
 pytest
 pytest-asyncio
+pytest-dotenv
 httpx

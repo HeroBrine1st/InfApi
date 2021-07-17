@@ -20,3 +20,7 @@ TORTOISE_ORM = {
         }
     }
 }
+LOGIN = os.getenv("LOGIN")
+PASSWORD = os.getenv("PASSWORD")
+COOKIE_BASE = os.getenv("COOKIE_BASE")
+ENABLE_POST_METHODS = os.getenv("ENABLE_POST_METHODS")
