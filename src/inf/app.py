@@ -40,13 +40,21 @@ async def get_variant(variant_id: int):
         raise HTTPException(status_code=404)
     return await VariantModel.of(variant)
 
-@app.get("/variants/{variant_id}/tasks", response_model=List[TaskModel])
+@app.get("/variants/{variant_id}/tasks/", response_model=List[TaskModel])
 async def get_tasks(variant_id: int):
     try:
         variant = await Variant.get(id=variant_id)
     except DoesNotExist:
         raise HTTPException(status_code=404)
     return [await TaskModel.of(task) async for task in variant.tasks.all()]
+
+@app.get("/variants/{variant_id}/tasks/{task_id}/", response_model=TaskModel)
+async def get_task(variant_id: int, task_id: int):
+    try:
+        variant = await Variant.get(id=variant_id)
+    except DoesNotExist:
+        raise HTTPException(status_code=404)
+    return await TaskModel.of(await variant.tasks.all().get(id=task_id))
 
 @app.get("/themes/", response_model=List[ThemeReducedModel])
 async def get_themes():
@@ -80,9 +88,21 @@ async def get_subtheme(theme_id: int, subtheme_id: int):
         raise HTTPException(status_code=404)
     return SubthemeModel.of(subtheme)
 
+@app.get("/themes/{theme_id}/subthemes/{subtheme_id}/tasks/", response_model=List[TaskModel])
+async def get_subtheme_tasks(theme_id: int, subtheme_id: int):
+    try:
+        theme = await Theme.get(id=theme_id)
+    except DoesNotExist:
+        raise HTTPException(status_code=404)
+    try:
+        subtheme = await theme.subthemes.all().get(id=subtheme_id)
+    except DoesNotExist:
+        raise HTTPException(status_code=404)
+    return [await TaskModel.of(task) async for task in subtheme.tasks.all()]
+
 # endregion
 # region Authentication
-@app.post("/login", status_code=204)
+@app.post("/login", status_code=204, include_in_schema=False)
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
     cookie.validate(credentials)
     response.set_cookie(COOKIE_NAME, cookie.get_cookie(),
@@ -112,7 +132,7 @@ async def create_subtheme(theme_id: int, subtheme: SubthemePostModel, _=Depends(
 async def create_variant(variant: VariantPostModel, _=Depends(cookie)):
     return await VariantModel.of(await Variant.create(name=variant.name))
 
-@app.post("/variants/{variant_id}/tasks")
+@app.post("/variants/{variant_id}/tasks/")
 async def create_task(variant_id: int, task: TaskPostModel, _=Depends(cookie)):
     try:
         variant = await Variant.get(id=variant_id)
@@ -127,7 +147,7 @@ async def create_task(variant_id: int, task: TaskPostModel, _=Depends(cookie)):
 
 # endregion
 # region PUT methods
-@app.put("/themes/{theme_id}", status_code=200, response_model=ThemeModel)
+@app.put("/themes/{theme_id}/", status_code=200, response_model=ThemeModel)
 async def put_theme(theme_id: int, theme: ThemePutModel, _=Depends(cookie)):
     try:
         theme_db = await Theme.get(id=theme_id)
@@ -137,7 +157,7 @@ async def put_theme(theme_id: int, theme: ThemePutModel, _=Depends(cookie)):
     await theme_db.save()
     return await ThemeModel.of(theme_db)
 
-@app.put("/theme/{theme_id/subthemes/{subtheme_id}", status_code=200, response_model=SubthemeModel)
+@app.put("/themes/{theme_id}/subthemes/{subtheme_id}/", status_code=200, response_model=SubthemeModel)
 async def put_subtheme(theme_id, subtheme_id: int, subtheme: SubthemePutModel, _=Depends(cookie)):
     try:
         theme_db = await Theme.get(id=theme_id)
@@ -158,7 +178,7 @@ async def put_subtheme(theme_id, subtheme_id: int, subtheme: SubthemePutModel, _
     await subtheme_db.save()
     return await SubthemeModel.of(subtheme_db)
 
-@app.put("/variant/{variant_id}", status_code=200, response_model=VariantModel)
+@app.put("/variants/{variant_id}/", status_code=200, response_model=VariantModel)
 async def put_variant(variant_id: int, variant: VariantPutModel, _=Depends(cookie)):
     try:
         variant_db = await Variant.get(id=variant_id)
@@ -168,7 +188,7 @@ async def put_variant(variant_id: int, variant: VariantPutModel, _=Depends(cooki
     await variant_db.save()
     return await VariantModel.of(variant_db)
 
-@app.put("/variant/{variant_id}/tasks/{task_id}", status_code=200, response_model=TaskModel)
+@app.put("/variants/{variant_id}/tasks/{task_id}/", status_code=200, response_model=TaskModel)
 async def put_task(variant_id: int, task_id: int, task: TaskPutModel, _=Depends(cookie)):
     try:
         variant_db = await Variant.get(id=variant_id)
