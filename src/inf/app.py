@@ -19,18 +19,17 @@ cookie = CookieAuth(name=COOKIE_NAME)
 
 # region Initialization and shutdown
 @app.on_event("startup")
-async def startup():
+async def startup(): # pragma: nocoverage
     await Tortoise.init(config=settings.TORTOISE_ORM)
 
 @app.on_event("shutdown")
-async def shutdown():
+async def shutdown(): # pragma: nocoverage
     await Tortoise.close_connections()
 
 # endregion
 # region GET Methods
 @app.get("/variants/", response_model=List[VariantReducedModel])
 async def get_variants():
-    print(cookie)
     return [await VariantReducedModel.of(variant) async for variant in Variant.all()]
 
 @app.get("/variants/{variant_id}/", response_model=VariantModel)

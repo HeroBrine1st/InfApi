@@ -11,4 +11,5 @@ starlette
 pytest
 pytest-asyncio
 pytest-dotenv
+pytest-cov
 httpx
