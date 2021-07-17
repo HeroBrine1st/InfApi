@@ -1,16 +1,13 @@
 import pytest
 import settings
 
-from httpx import AsyncClient
 from tortoise import Tortoise
-from inf import app
 from inf.models import *
 
 @pytest.fixture(scope="function")
 @pytest.mark.asyncio
-async def database():
+async def database_with_test_data():
     # Connect
-
     await Tortoise.init(config=settings.TORTOISE_ORM)
     # Clear database
     async for theme in Theme.all():
@@ -48,9 +45,3 @@ async def database():
     # Close connection
     yield
     await Tortoise.close_connections()
-
-@pytest.fixture(scope="function")
-@pytest.mark.asyncio
-async def client():
-    async with AsyncClient(app=app, base_url="http://test") as client:
-        yield client

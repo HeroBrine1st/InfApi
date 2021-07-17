@@ -3,11 +3,11 @@ import pytest
 from httpx import AsyncClient
 
 from inf.datamodels import *
-from test_initialization import client, database
+from fixtures import client, database_with_test_data
 
 @pytest.mark.asyncio
 @pytest.mark.usefixtures(client.__name__)
-@pytest.mark.usefixtures(database.__name__)
+@pytest.mark.usefixtures(database_with_test_data.__name__)
 async def test_get_variants(client: AsyncClient):
     response_variants = await client.get("/variants/")
     assert response_variants.status_code == 200
