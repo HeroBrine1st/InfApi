@@ -10,6 +10,7 @@ class Task(Model):
     id = IntField(pk=True)
     number = IntField()
     content = TextField()
+    solution = TextField()
     variant: ForeignKeyRelation["Variant"] = ForeignKeyField("inf.Variant", "tasks")
     subtheme: ForeignKeyRelation["Subtheme"] = ForeignKeyField("inf.Subtheme", "tasks")
 

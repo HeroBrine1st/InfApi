@@ -40,8 +40,8 @@ async def database_with_test_data():
             subtheme = subtheme3
         if i % 4 == 3:
             subtheme = subtheme4
-        await Task.create(number=i, content="Задание %s" % i, subtheme=subtheme, variant=variant)
+        await Task.create(number=i // 2 + 1, content="Задание %s" % i, solution="Решение %s" % i, subtheme=subtheme, variant=variant)
 
     # Close connection
-    yield
+    yield [theme1.id, theme2.id, subtheme1.id, subtheme2.id, subtheme3.id, subtheme4.id, variant1.id, variant2.id] + [task.id async for task in Task.all()]
     await Tortoise.close_connections()

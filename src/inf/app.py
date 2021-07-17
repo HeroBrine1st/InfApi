@@ -1,4 +1,7 @@
 import os
+
+from starlette.requests import Request
+
 import settings
 
 from datetime import datetime, timedelta
@@ -19,11 +22,11 @@ cookie = CookieAuth(name=COOKIE_NAME)
 
 # region Initialization and shutdown
 @app.on_event("startup")
-async def startup(): # pragma: nocoverage
+async def startup():  # pragma: nocoverage
     await Tortoise.init(config=settings.TORTOISE_ORM)
 
 @app.on_event("shutdown")
-async def shutdown(): # pragma: nocoverage
+async def shutdown():  # pragma: nocoverage
     await Tortoise.close_connections()
 
 # endregion
@@ -36,7 +39,7 @@ async def get_variants():
 async def get_variant(variant_id: int):
     try:
         variant = await Variant.get(id=variant_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
     return await VariantModel.of(variant)
 
@@ -44,7 +47,7 @@ async def get_variant(variant_id: int):
 async def get_tasks(variant_id: int):
     try:
         variant = await Variant.get(id=variant_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
     return [await TaskModel.of(task) async for task in variant.tasks.all()]
 
@@ -52,7 +55,7 @@ async def get_tasks(variant_id: int):
 async def get_task(variant_id: int, task_id: int):
     try:
         variant = await Variant.get(id=variant_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
     return await TaskModel.of(await variant.tasks.all().get(id=task_id))
 
@@ -64,7 +67,7 @@ async def get_themes():
 async def get_theme(theme_id: int):
     try:
         theme = await Theme.get(id=theme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
     return await ThemeModel.of(theme)
 
@@ -72,37 +75,37 @@ async def get_theme(theme_id: int):
 async def get_subthemes(theme_id: int):
     try:
         theme = await Theme.get(id=theme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
-    return [SubthemeReducedModel.of(subtheme) async for subtheme in theme.subthemes.all()]
+    return [await SubthemeReducedModel.of(subtheme) async for subtheme in theme.subthemes.all()]
 
 @app.get("/themes/{theme_id}/subthemes/{subtheme_id}/", response_model=SubthemeModel)
 async def get_subtheme(theme_id: int, subtheme_id: int):
     try:
         theme = await Theme.get(id=theme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
     try:
         subtheme = await theme.subthemes.all().get(id=subtheme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
-    return SubthemeModel.of(subtheme)
+    return await SubthemeModel.of(subtheme)
 
 @app.get("/themes/{theme_id}/subthemes/{subtheme_id}/tasks/", response_model=List[TaskModel])
 async def get_subtheme_tasks(theme_id: int, subtheme_id: int):
     try:
         theme = await Theme.get(id=theme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
     try:
         subtheme = await theme.subthemes.all().get(id=subtheme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
     return [await TaskModel.of(task) async for task in subtheme.tasks.all()]
 
 # endregion
 # region Authentication
-@app.post("/login", status_code=204, include_in_schema=False)
+@app.post("/login", status_code=204)
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
     cookie.validate(credentials)
     response.set_cookie(COOKIE_NAME, cookie.get_cookie(),
@@ -110,7 +113,6 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
                             (datetime.now() + timedelta(days=1)).date(),
                             datetime.min.time()
                         ) - datetime.now()).seconds)
-    print(cookie.get_cookie())
     response.status_code = 204
     return response
 
@@ -124,7 +126,7 @@ async def create_theme(theme: ThemePostModel, _=Depends(cookie)):
 async def create_subtheme(theme_id: int, subtheme: SubthemePostModel, _=Depends(cookie)):
     try:
         theme = await Theme.get(id=theme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Theme with provided theme_id not found")
     return await SubthemeModel.of(await Subtheme.create(name=subtheme.name, cheat=subtheme.cheat, theme=theme))
 
@@ -132,18 +134,19 @@ async def create_subtheme(theme_id: int, subtheme: SubthemePostModel, _=Depends(
 async def create_variant(variant: VariantPostModel, _=Depends(cookie)):
     return await VariantModel.of(await Variant.create(name=variant.name))
 
-@app.post("/variants/{variant_id}/tasks/")
+@app.post("/variants/{variant_id}/tasks/", status_code=201, response_model=TaskModel)
 async def create_task(variant_id: int, task: TaskPostModel, _=Depends(cookie)):
     try:
         variant = await Variant.get(id=variant_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Variant with provided variant_id not found")
     try:
         subtheme = await Subtheme.get(id=task.subtheme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Subtheme with provided subtheme_id not found")
     return await TaskModel.of(
-        await Task.create(number=task.number, content=task.content, variant=variant, subtheme=subtheme))
+        await Task.create(number=task.number, content=task.content, variant=variant, subtheme=subtheme,
+                          solution=task.solution))
 
 # endregion
 # region PUT methods
@@ -151,7 +154,7 @@ async def create_task(variant_id: int, task: TaskPostModel, _=Depends(cookie)):
 async def put_theme(theme_id: int, theme: ThemePutModel, _=Depends(cookie)):
     try:
         theme_db = await Theme.get(id=theme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Theme with provided theme_id not found")
     theme_db.name = theme.name
     await theme_db.save()
@@ -161,18 +164,18 @@ async def put_theme(theme_id: int, theme: ThemePutModel, _=Depends(cookie)):
 async def put_subtheme(theme_id, subtheme_id: int, subtheme: SubthemePutModel, _=Depends(cookie)):
     try:
         theme_db = await Theme.get(id=theme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Theme with provided theme_id not found")
     try:
         subtheme_db = await theme_db.subthemes.all().get(id=subtheme_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Subtheme with provided subtheme_id not found")
     subtheme_db.name = subtheme.name
     subtheme_db.cheat = subtheme.cheat
     if subtheme.theme_id:
         try:
             new_theme = await Theme.get(id=subtheme.theme_id)
-        except DoesNotExist:
+        except DoesNotExist: # pragma: nocoverage
             raise HTTPException(status_code=404, detail="Theme with provided theme_id in body not found")
         subtheme_db.theme = new_theme
     await subtheme_db.save()
@@ -182,7 +185,7 @@ async def put_subtheme(theme_id, subtheme_id: int, subtheme: SubthemePutModel, _
 async def put_variant(variant_id: int, variant: VariantPutModel, _=Depends(cookie)):
     try:
         variant_db = await Variant.get(id=variant_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Variant with provided variant_id not found")
     variant_db.name = variant.name
     await variant_db.save()
@@ -192,24 +195,25 @@ async def put_variant(variant_id: int, variant: VariantPutModel, _=Depends(cooki
 async def put_task(variant_id: int, task_id: int, task: TaskPutModel, _=Depends(cookie)):
     try:
         variant_db = await Variant.get(id=variant_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Variant with provided variant_id not found")
     try:
         task_db = await variant_db.tasks.all().get(id=task_id)
-    except DoesNotExist:
+    except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404, detail="Task with provided task_id not found")
     task_db.content = task.content
     task_db.number = task.number
+    task_db.solution = task.solution
     if task.subtheme_id:
         try:
             new_subtheme = await Subtheme.get(id=task.subtheme_id)
-        except DoesNotExist:
+        except DoesNotExist: # pragma: nocoverage
             raise HTTPException(status_code=404, detail="Subtheme with provided subtheme_id in body not found")
         task_db.subtheme = new_subtheme
     if task.variant_id:
         try:
             new_variant = await Variant.get(id=task.variant_id)
-        except DoesNotExist:
+        except DoesNotExist: # pragma: nocoverage
             raise HTTPException(status_code=404, detail="Variant with provided variant_id in body not found")
         task_db.variant = new_variant
     await task_db.save()

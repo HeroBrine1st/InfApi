@@ -48,6 +48,7 @@ class TaskModel(BaseModel):
     variant: VariantReducedModel
     number: int
     content: str
+    solution: str
     subtheme: SubthemeReducedModel
 
     @staticmethod
@@ -57,6 +58,7 @@ class TaskModel(BaseModel):
             variant=await VariantReducedModel.of(await task.variant),
             number=task.number,
             content=task.content,
+            solution=task.solution,
             subtheme=await SubthemeReducedModel.of(await task.subtheme)
         )
 
@@ -103,6 +105,7 @@ class TaskPostModel(BaseModel):
     # variant id included in URL
     number: int
     content: str
+    solution: str
     subtheme_id: int
 
 class VariantPostModel(BaseModel):
