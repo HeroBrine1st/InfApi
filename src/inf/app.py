@@ -17,7 +17,7 @@ from typing import List
 
 COOKIE_NAME = "SESSION"
 
-app = FastAPI(title="Inf API", root_path=os.environ.get("ROOT_PATH") or "")
+app = FastAPI(title="Inf API", root_path=settings.ROOT_URL)
 cookie = CookieAuth(name=COOKIE_NAME)
 
 # region Initialization and shutdown
