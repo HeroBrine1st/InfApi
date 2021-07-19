@@ -107,7 +107,7 @@ async def get_subtheme_tasks(theme_id: int, subtheme_id: int):
 # region Authentication
 @app.post("/login", status_code=204)
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
-    if not settings.ENABLE_POST_METHODS:
+    if not settings.ENABLE_POST_METHODS: # pragma: nocoverage
         return HTTPException(503, "Disabled")
     cookie.validate(credentials)
     response.set_cookie(COOKIE_NAME, cookie.get_cookie(),
