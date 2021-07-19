@@ -151,7 +151,7 @@ async def create_task(variant_id: int, task: TaskPostModel, _=Depends(cookie)):
                           solution=task.solution))
 
 # endregion
-# region PUT methods
+#region PUT Methods
 @app.put("/themes/{theme_id}/", status_code=200, response_model=ThemeModel)
 async def put_theme(theme_id: int, theme: ThemePutModel, _=Depends(cookie)):
     try:
@@ -222,3 +222,48 @@ async def put_task(variant_id: int, task_id: int, task: TaskPutModel, _=Depends(
     return await TaskModel.of(task_db)
 
 # endregion
+#region DELETE Methods
+@app.delete("/themes/{theme_id}/", status_code=204)
+async def delete_theme(theme_id: int, _=Depends(cookie)):
+    try:
+        theme_db = await Theme.get(id=theme_id)
+    except DoesNotExist: # pragma: nocoverage
+        raise HTTPException(status_code=404, detail="Theme with provided theme_id not found")
+    await theme_db.delete()
+    return
+
+@app.delete("/themes/{theme_id}/subthemes/{subtheme_id}/", status_code=204)
+async def delete_subtheme(theme_id, subtheme_id: int, _=Depends(cookie)):
+    try:
+        theme_db = await Theme.get(id=theme_id)
+    except DoesNotExist: # pragma: nocoverage
+        raise HTTPException(status_code=404, detail="Theme with provided theme_id not found")
+    try:
+        subtheme_db = await theme_db.subthemes.all().get(id=subtheme_id)
+    except DoesNotExist: # pragma: nocoverage
+        raise HTTPException(status_code=404, detail="Subtheme with provided subtheme_id not found")
+    await subtheme_db.delete()
+    return
+
+@app.delete("/variants/{variant_id}/", status_code=204)
+async def delete_variant(variant_id: int, _=Depends(cookie)):
+    try:
+        variant_db = await Variant.get(id=variant_id)
+    except DoesNotExist: # pragma: nocoverage
+        raise HTTPException(status_code=404, detail="Variant with provided variant_id not found")
+    await variant_db.delete()
+    return
+
+@app.delete("/variants/{variant_id}/tasks/{task_id}/", status_code=204)
+async def delete_task(variant_id: int, task_id: int, _=Depends(cookie)):
+    try:
+        variant_db = await Variant.get(id=variant_id)
+    except DoesNotExist: # pragma: nocoverage
+        raise HTTPException(status_code=404, detail="Variant with provided variant_id not found")
+    try:
+        task_db = await variant_db.tasks.all().get(id=task_id)
+    except DoesNotExist: # pragma: nocoverage
+        raise HTTPException(status_code=404, detail="Task with provided task_id not found")
+    await task_db.delete()
+    return
+#endregion
