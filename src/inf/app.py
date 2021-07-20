@@ -102,79 +102,7 @@ async def get_subtheme_tasks(theme_id: int, subtheme_id: int):
     except DoesNotExist: # pragma: nocoverage
         raise HTTPException(status_code=404)
     return [await TaskModel.of(task) async for task in subtheme.tasks.all()]
-# endregion
-# region HEAD methods 
-@app.head("/variants/", response_model=List[VariantReducedModel])
-async def get_variants():
-    return [await VariantReducedModel.of(variant) async for variant in Variant.all()]
 
-@app.head("/variants/{variant_id}/", response_model=VariantModel)
-async def get_variant(variant_id: int):
-    try:
-        variant = await Variant.get(id=variant_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    return await VariantModel.of(variant)
-
-@app.head("/variants/{variant_id}/tasks/", response_model=List[TaskModel])
-async def get_tasks(variant_id: int):
-    try:
-        variant = await Variant.get(id=variant_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    return [await TaskModel.of(task) async for task in variant.tasks.all()]
-
-@app.head("/variants/{variant_id}/tasks/{task_id}/", response_model=TaskModel)
-async def get_task(variant_id: int, task_id: int):
-    try:
-        variant = await Variant.get(id=variant_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    return await TaskModel.of(await variant.tasks.all().get(id=task_id))
-
-@app.head("/themes/", response_model=List[ThemeReducedModel])
-async def get_themes():
-    return [await ThemeReducedModel.of(theme) async for theme in Theme.all()]
-
-@app.head("/themes/{theme_id}/", response_model=ThemeReducedModel)
-async def get_theme(theme_id: int):
-    try:
-        theme = await Theme.get(id=theme_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    return await ThemeModel.of(theme)
-
-@app.head("/themes/{theme_id}/subthemes/", response_model=List[SubthemeReducedModel])
-async def get_subthemes(theme_id: int):
-    try:
-        theme = await Theme.get(id=theme_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    return [await SubthemeReducedModel.of(subtheme) async for subtheme in theme.subthemes.all()]
-
-@app.head("/themes/{theme_id}/subthemes/{subtheme_id}/", response_model=SubthemeModel)
-async def get_subtheme(theme_id: int, subtheme_id: int):
-    try:
-        theme = await Theme.get(id=theme_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    try:
-        subtheme = await theme.subthemes.all().get(id=subtheme_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    return await SubthemeModel.of(subtheme)
-
-@app.head("/themes/{theme_id}/subthemes/{subtheme_id}/tasks/", response_model=List[TaskModel])
-async def get_subtheme_tasks(theme_id: int, subtheme_id: int):
-    try:
-        theme = await Theme.get(id=theme_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    try:
-        subtheme = await theme.subthemes.all().get(id=subtheme_id)
-    except DoesNotExist: # pragma: nocoverage
-        raise HTTPException(status_code=404)
-    return [await TaskModel.of(task) async for task in subtheme.tasks.all()]
 # endregion
 # region Authentication
 @app.post("/login", status_code=204)
