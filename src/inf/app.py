@@ -118,6 +118,11 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     response.status_code = 204
     return response
 
+@app.get("/checkauth", status_code=204)
+async def login(_=Depends(cookie)):
+    if not settings.ENABLE_POST_METHODS: # pragma: nocoverage
+        return HTTPException(503, "Disabled")
+    return
 # endregion
 # region POST Methods
 @app.post("/themes/", status_code=201, response_model=ThemeModel)
