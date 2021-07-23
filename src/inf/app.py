@@ -119,7 +119,7 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     return response
 
 @app.get("/checkauth", status_code=204)
-async def login(_=Depends(cookie)):
+async def check_auth(_=Depends(cookie)):
     if not settings.ENABLE_POST_METHODS: # pragma: nocoverage
         return HTTPException(503, "Disabled")
     return
