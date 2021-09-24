@@ -22,6 +22,7 @@ class SubthemeReducedModel(BaseModel):
     name: str
     theme_id: int
     task_count: int
+    cheat: str
 
     @staticmethod
     async def of(subtheme: Subtheme):
@@ -29,7 +30,8 @@ class SubthemeReducedModel(BaseModel):
             id=subtheme.id,
             name=subtheme.name,
             theme_id=(await subtheme.theme).id,
-            task_count=(await subtheme.tasks.all().count())
+            task_count=(await subtheme.tasks.all().count()),
+            cheat=subtheme.cheat
         )
 
 class ThemeReducedModel(BaseModel):
