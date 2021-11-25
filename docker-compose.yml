@@ -1,0 +1,33 @@
+version: "3"
+services:
+  backend:
+    build: .
+    ports:
+      - "127.0.0.1:8080:80"
+    restart: always
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=inf
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    volumes:
+      - migrations:/migrations
+  mysql:
+    image: mysql:latest
+    # ports:
+    #   - "127.0.0.1:38970:3306"
+    restart: always
+    environment:
+      - MYSQL_DATABASE=inf
+    env_file:
+      - .env.mysql.local
+    volumes:
+      - mysql:/var/lib/mysql
+volumes:
+  mysql:
+  backend:
+  migrations:

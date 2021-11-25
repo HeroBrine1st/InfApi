@@ -6,3 +6,4 @@ __pycache__
 /migrations
 start.sh
 .idea
+.env.*.local

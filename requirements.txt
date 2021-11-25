@@ -8,8 +8,5 @@ python-dotenv
 python-multipart
 starlette
 
-pytest
-pytest-asyncio
-pytest-dotenv
-pytest-cov
-httpx
+# Docker
+cryptography
