@@ -34,7 +34,7 @@ async def test_create(client_authorized: AsyncClient):
                                                            content=SubthemePostModel(name="TestSubtheme1",
                                                                                      cheat="TestCheat").json())
     assert response_post_subtheme1.status_code == 201
-    response_subthemes = await client_authorized.get("/themes/%s/subthemes" % theme_id1)
+    response_subthemes = await client_authorized.get("/themes/%s/subthemes/" % theme_id1)
     assert response_subthemes.status_code == 200
     assert len(response_subthemes.json()) == 1
     assert response_subthemes.json()[0]["id"] == response_post_subtheme1.json()["id"]
@@ -63,7 +63,7 @@ async def test_put(client_authorized: AsyncClient, database_with_test_data: list
     variant_ids = database_with_test_data[6:8]
     task_ids = database_with_test_data[8:]
 
-    response = await client_authorized.put("/variants/%s/tasks/%s" % (variant_ids[0], task_ids[0]),
+    response = await client_authorized.put("/variants/%s/tasks/%s/" % (variant_ids[0], task_ids[0]),
                                            json=TaskPutModel(number=5, content="Test content", solution="Test solution",
                                                              subtheme_id=subtheme_ids[1],
                                                              variant_id=variant_ids[1]).dict())
@@ -77,10 +77,10 @@ async def test_put(client_authorized: AsyncClient, database_with_test_data: list
     assert response_get_subtheme_tasks2.status_code == 200
     assert len(response_get_subtheme_tasks2.json()) == 5
 
-    response_get_variant_tasks = await client_authorized.get("/variants/%s/tasks" % variant_ids[0])
+    response_get_variant_tasks = await client_authorized.get("/variants/%s/tasks/" % variant_ids[0])
     assert response_get_variant_tasks.status_code == 200
     assert len(response_get_variant_tasks.json()) == 7
-    response_get_variant_tasks2 = await client_authorized.get("/variants/%s/tasks" % variant_ids[1])
+    response_get_variant_tasks2 = await client_authorized.get("/variants/%s/tasks/" % variant_ids[1])
     assert response_get_variant_tasks2.status_code == 200
     assert len(response_get_variant_tasks2.json()) == 9
 

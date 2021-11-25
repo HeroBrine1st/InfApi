@@ -12,7 +12,7 @@ async def test_get_variants(client: AsyncClient):
     assert response_variants.status_code == 200
     assert len(response_variants.json()) == 2
     for variant in response_variants.json():
-        response_variant = await client.get("/variants/%s" % variant["id"])
+        response_variant = await client.get("/variants/%s/" % variant["id"])
         assert response_variant.status_code == 200
         model = VariantModel.parse_obj(response_variant.json())
         assert len(model.tasks) == 8
@@ -36,7 +36,7 @@ async def test_get_themes(client: AsyncClient):
             response_subtheme = await client.get("/themes/%s/subthemes/%s/" % (theme["id"], subtheme["id"]))
             assert response_subtheme.status_code == 200
             assert response_subtheme.json()["id"] == subtheme["id"]
-            response_tasks = await client.get("/themes/%s/subthemes/%s/tasks" % (theme["id"], subtheme["id"]))
+            response_tasks = await client.get("/themes/%s/subthemes/%s/tasks/" % (theme["id"], subtheme["id"]))
             assert response_tasks.status_code == 200
             assert len(response_tasks.json()) == 4
 
