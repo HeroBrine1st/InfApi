@@ -14,6 +14,8 @@ from inf.auth import CookieAuth
 from inf.datamodels import *
 from inf.models import *
 from typing import List
+from inf.auth import validate, get_cookie
+
 
 COOKIE_NAME = "SESSION"
 
@@ -28,6 +30,13 @@ async def startup():  # pragma: nocoverage
 @app.on_event("shutdown")
 async def shutdown():  # pragma: nocoverage
     await Tortoise.close_connections()
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    response = await call_next(request)
+    if "Content-Length" in response.headers:
+        response.headers["X-Content-Length"] = response.headers["Content-Length"]
+    return response
 
 # endregion
 # region GET Methods
@@ -109,8 +118,8 @@ async def get_subtheme_tasks(theme_id: int, subtheme_id: int):
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
     if not settings.ENABLE_POST_METHODS: # pragma: nocoverage
         return HTTPException(503, "Disabled")
-    cookie.validate(credentials)
-    response.set_cookie(COOKIE_NAME, cookie.get_cookie(),
+    validate(credentials)
+    response.set_cookie(COOKIE_NAME, get_cookie(),
                         expires=(datetime.combine(
                             (datetime.now() + timedelta(days=1)).date(),
                             datetime.min.time()
